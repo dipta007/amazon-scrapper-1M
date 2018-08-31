@@ -6,6 +6,7 @@ from sys import platform as _platform
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import Proxy
+import time
 import ElasticSearch
 
 
@@ -35,17 +36,22 @@ elastic_search = None
 
 
 class ScrapingThread(threading.Thread):
-    def __init__(self, asin, search_txt, type):
+    def __init__(self, asin, search_txt, type, url, strt, endd):
         threading.Thread.__init__(self)
         self.asin = asin
         self.search_text = search_txt
         self.type = type
+        self.starting = strt
+        self.ending = endd
+        self.url = url
 
     def run(self):
-        if self.type == 1:
+        if self.type == 2:
             get_data(self.asin)
-        else:
+        elif self.type == 0:
             give_a_search(self.search_text)
+        else:
+            search_page_scrape(self.starting, self.ending, self.url)
 
 
 def get_data(asin):
@@ -167,73 +173,62 @@ def get_the_product(asin):
         driver.quit()
 
 
-def search_page_scrape(starting, ending, driver):
+def search_page_scrape(starting, ending, url):
+    driver = get_driver()
+    driver.get(url)
+
+    if driver.find_elements_by_id("noResultsTitle"):
+        driver.quit()
+        return
+
     ind = starting
-    last_successful = ind
     while ind < ending:
         try:
             result_id = "result_" + str(ind)
             ele = driver.find_element_by_id(result_id)
             asin = ele.get_attribute('data-asin')
 
-            thread = ScrapingThread(asin, "", 1)
+            thread = ScrapingThread(asin, "", 2, "", "", "")
             threads.append(thread)
             not_started_threads.put(thread)
 
-            last_successful = ind
             ind += 1
         except Exception as e:
             ind += 1
-    return last_successful
+    return
 
 
 def give_a_search(search_text):
     counter = 1
     url = SEARCH_URL + search_text
-    driver = get_driver()
-    driver.get(url)
-    while True:
-        tmp = counter
-        counter = search_page_scrape(counter, counter+40, driver)
-
-        print("1", not_started_threads.qsize())
-        print("2", started_threads.qsize())
-        while not_started_threads.empty() == False:
-            if threading.active_count() < THREADING_LIMIT:
-                curr_thread = not_started_threads.get()
-                started_threads.put(curr_thread)
-                curr_thread.start()
-
-        if counter == tmp:
-            break
-
-    try:
-        next_button = driver.find_element_by_id("pagnNextLink")
-        driver.execute_script("arguments[0].click();", next_button)
-    except Exception as e:
-        driver.quit()
+    pageNo = 1
+    while pageNo < 40:
+        thread = ScrapingThread("", "", 1, url+"&page="+str(pageNo), counter, counter+40)
+        pageNo += 1
+        not_started_threads.put(thread)
 
 
 def solve():
     threads.clear()
     for src in search_fields:
-        give_a_search(src)
+        thread = ScrapingThread("", src, 0, "", "", "")
+        not_started_threads.put(thread)
 
-    print(not_started_threads.qsize())
-    print(started_threads.qsize())
-    while not_started_threads.empty() == False:
-        print("3 ",not_started_threads.qsize())
-        print("3 ", started_threads.qsize())
+    while not not_started_threads.empty():
         if threading.active_count() < THREADING_LIMIT:
             curr_thread = not_started_threads.get()
             started_threads.put(curr_thread)
             curr_thread.start()
 
-        while started_threads.empty() == True:
+        while not started_threads.empty():
             started_threads.get().join()
+
+        if not_started_threads.empty():
+            time.sleep(10)
+
 
 if __name__ == "__main__":
     elastic_search = ElasticSearch.connect_elasticsearch()
     if elastic_search is not None:
         solve()
-        print(len(products))
+        print("len ", len(products))
