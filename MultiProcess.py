@@ -167,6 +167,7 @@ def search_page_scrape(starting, ending, url):
         return
 
     ind = starting
+    processes2 = []
     while ind < ending:
         try:
             result_id = "result_" + str(ind)
@@ -174,11 +175,18 @@ def search_page_scrape(starting, ending, url):
             asin = ele.get_attribute('data-asin')
 
             process = Process(target=get_data, args=(asin,))
-            processes.append(process)
+            processes2.append(process)
 
             ind += 1
         except Exception as e:
             ind += 1
+
+    for process in processes2:
+        process.start()
+
+    for process in processes2:
+        process.join()
+
     return
 
 
