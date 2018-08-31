@@ -13,22 +13,22 @@ SEARCH_URL = "https://www.amazon.com/s/ref=nb_sb_noss_2?url=search-alias%3Daps&f
 PRODUCT_URL = "https://www.amazon.com/dp/"
 search_fields = [
     "iphone",
-    # "mobile",
-    # "beauty",
-    # "hair",
-    # "apple",
-    # "macbook",
-    # "calcukator",
-    # "pen",
-    # "glass",
-    # "note 8",
-    # "samsung",
-    # "wallet",
-    # "watch"
+    "mobile",
+    "beauty",
+    "hair",
+    "apple",
+    "macbook",
+    "calcukator",
+    "pen",
+    "glass",
+    "note 8",
+    "samsung",
+    "wallet",
+    "watch"
 ]
 products = []
 threads = []
-THREADING_LIMIT = 40
+THREADING_LIMIT = 30000
 started_threads = queue.Queue(maxsize=1000000)
 not_started_threads = queue.Queue(maxsize=1000000)
 elastic_search = None
