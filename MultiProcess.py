@@ -30,30 +30,11 @@ search_fields = [
     "watch"
 ]
 products = []
-threads = []
+processes = []
 THREADING_LIMIT = 10
 started_threads = queue.Queue(maxsize=1000000)
 not_started_threads = queue.Queue(maxsize=1000000)
 elastic_search = None
-
-
-class ScrapingThread(threading.Thread):
-    def __init__(self, asin, search_txt, type, url, strt, endd):
-        threading.Thread.__init__(self)
-        self.asin = asin
-        self.search_text = search_txt
-        self.type = type
-        self.starting = strt
-        self.ending = endd
-        self.url = url
-
-    def run(self):
-        if self.type == 2:
-            get_data(self.asin)
-        elif self.type == 0:
-            give_a_search(self.search_text)
-        else:
-            search_page_scrape(self.starting, self.ending, self.url)
 
 
 def get_data(asin):
@@ -166,8 +147,8 @@ def get_the_product(asin):
         #         break
 
         driver.quit()
-        if not flg:
-            return
+        # if not flg:
+        #     return
 
         return curr_product
     except Exception as e:
