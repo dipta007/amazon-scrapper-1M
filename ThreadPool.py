@@ -229,7 +229,7 @@ def give_a_search(search_text):
     url = SEARCH_URL + search_text
     pageNo = 1
     while pageNo < 40:
-        pool.add_task(search_page_scrape, ((pageNo-1)*30, pageNo*30, url+"&page="+str(pageNo)))
+        pool.add_task(search_page_scrape, [(pageNo-1)*30, pageNo*30, url+"&page="+str(pageNo)])
         pageNo += 1
         print(pageNo, search_text)
 
