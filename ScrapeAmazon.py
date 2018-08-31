@@ -30,7 +30,7 @@ search_fields = [
 ]
 products = []
 threads = []
-THREADING_LIMIT = 30000
+THREADING_LIMIT = 222
 started_threads = queue.Queue(maxsize=1000000)
 not_started_threads = queue.Queue(maxsize=1000000)
 elastic_search = None
@@ -198,8 +198,16 @@ def search_page_scrape(starting, ending, url):
         except Exception as e:
             ind += 1
 
-    for thread in threads3:
-        thread.start()
+    ind = 0;
+    while ind < len(threads3):
+        if threading.active_count() < THREADING_LIMIT:
+            try:
+                threads3[ind].start()
+                ind += 1
+            except Exception as e:
+                e = 1+2
+        else:
+            time.sleep(random.randint(1,4))
 
     for thread in threads3:
         thread.join()
@@ -217,8 +225,16 @@ def give_a_search(search_text):
         threads2.append(thread)
         pageNo += 1
 
-    for thread in threads2:
-        thread.start()
+    ind = 0;
+    while ind < len(threads2):
+        if threading.active_count() < THREADING_LIMIT:
+            try:
+                threads2[ind].start()
+                ind += 1
+            except Exception as e:
+                e = 1 + 2
+        else:
+            time.sleep(random.randint(1, 4))
 
     for thread in threads2:
         thread.join()
@@ -230,8 +246,16 @@ def solve():
         thread = ScrapingThread("", src, 0, "", "", "")
         threads.append(thread)
 
-    for thread in threads:
-        thread.start()
+    ind = 0;
+    while ind < len(threads):
+        if threading.active_count() < THREADING_LIMIT:
+            try:
+                threads[ind].start()
+                ind += 1
+            except Exception as e:
+                e = 1 + 2
+        else:
+            time.sleep(random.randint(1, 4))
 
     for thread in threads:
         thread.join()
