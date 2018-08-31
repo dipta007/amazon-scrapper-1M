@@ -13,22 +13,22 @@ SEARCH_URL = "https://www.amazon.com/s/ref=nb_sb_noss_2?url=search-alias%3Daps&f
 PRODUCT_URL = "https://www.amazon.com/dp/"
 search_fields = [
     "iphone",
-    "mobile",
-    "beauty",
-    "hair",
-    "apple",
-    "macbook",
-    "calcukator",
-    "pen",
-    "glass",
-    "note 8",
-    "samsung",
-    "wallet",
-    "watch"
+    # "mobile",
+    # "beauty",
+    # "hair",
+    # "apple",
+    # "macbook",
+    # "calcukator",
+    # "pen",
+    # "glass",
+    # "note 8",
+    # "samsung",
+    # "wallet",
+    # "watch"
 ]
 products = []
 threads = []
-THREADING_LIMIT = 3
+THREADING_LIMIT = 40
 started_threads = queue.Queue(maxsize=1000000)
 not_started_threads = queue.Queue(maxsize=1000000)
 elastic_search = None
@@ -51,7 +51,7 @@ class ScrapingThread(threading.Thread):
 def get_data(asin):
     current_product = get_the_product(asin)
     if current_product:
-        # products.append(current_product)
+        products.append(current_product)
         json_data = json.dumps(current_product, indent=4, sort_keys=False)
         elastic_search.index(index="amazon", doc_type="product-title", id=asin, body=json_data)
 
@@ -142,8 +142,8 @@ def get_the_product(asin):
         curr_product = {}
         curr_product['asin'] = asin
         curr_product['title'] = driver.find_element_by_id("productTitle").text
-        curr_product['price'] = get_price(driver)
-        curr_product['images'] = get_images(driver)
+        # curr_product['price'] = get_price(driver)
+        # curr_product['images'] = get_images(driver)
 
         flg = True
         for key, value in curr_product.items():
@@ -194,7 +194,9 @@ def give_a_search(search_text):
         tmp = counter
         counter = search_page_scrape(counter, counter+40, driver)
 
-        while not not_started_threads.empty():
+        print("1", not_started_threads.qsize())
+        print("2", started_threads.qsize())
+        while not_started_threads.empty() == False:
             if threading.active_count() < THREADING_LIMIT:
                 curr_thread = not_started_threads.get()
                 started_threads.put(curr_thread)
@@ -202,6 +204,10 @@ def give_a_search(search_text):
 
         if counter == tmp:
             break
+
+        next_button = driver.find_element_by_id("pagnNextLink")
+        driver.execute_script("arguments[0].click();", next_button)
+        print(next_button.text)
     driver.quit()
 
 
@@ -210,16 +216,21 @@ def solve():
     for src in search_fields:
         give_a_search(src)
 
-    while not not_started_threads.empty():
+    print(not_started_threads.qsize())
+    print(started_threads.qsize())
+    while not_started_threads.empty() == False:
+        print("3 ",not_started_threads.qsize())
+        print("3 ", started_threads.qsize())
         if threading.active_count() < THREADING_LIMIT:
             curr_thread = not_started_threads.get()
             started_threads.put(curr_thread)
             curr_thread.start()
-    while not started_threads.empty():
-        started_threads.get().join()
 
+        while started_threads.empty() == True:
+            started_threads.get().join()
 
 if __name__ == "__main__":
     elastic_search = ElasticSearch.connect_elasticsearch()
     if elastic_search is not None:
         solve()
+        print(len(products))
