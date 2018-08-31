@@ -56,6 +56,7 @@ class ScrapingThread(threading.Thread):
 
 
 def get_data(asin):
+    print(asin)
     current_product = get_the_product(asin)
     if current_product:
         products.append(current_product)
