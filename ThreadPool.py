@@ -6,6 +6,8 @@ from sys import platform as _platform
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from concurrent.futures import ThreadPoolExecutor
+from threading import Thread
+from queue import Queue
 import Proxy
 import time
 import ElasticSearch
@@ -31,37 +33,57 @@ search_fields = [
 products = []
 threads = []
 THREADING_LIMIT = 444
-executor = ThreadPoolExecutor(max_workers=THREADING_LIMIT)
-started_threads = queue.Queue(maxsize=1000000)
-not_started_threads = queue.Queue(maxsize=1000000)
 elastic_search = None
 
 
-class ScrapingThread(threading.Thread):
-    def __init__(self, asin, search_txt, type, url, strt, endd):
-        threading.Thread.__init__(self)
-        self.asin = asin
-        self.search_text = search_txt
-        self.type = type
-        self.starting = strt
-        self.ending = endd
-        self.url = url
+class Worker(Thread):
+    """ Thread executing tasks from a given tasks queue """
+    def __init__(self, tasks):
+        Thread.__init__(self)
+        self.tasks = tasks
+        self.daemon = True
+        self.start()
 
     def run(self):
-        if self.type == 2:
-            get_data(self.asin)
-        elif self.type == 0:
-            give_a_search(self.search_text)
-        else:
-            search_page_scrape(self.starting, self.ending, self.url)
+        while True:
+            func, args, kargs = self.tasks.get()
+            try:
+                func(*args, **kargs)
+            except Exception as e:
+                # An exception happened in this thread
+                print(e)
+            finally:
+                # Mark this task as done, whether an exception happened or not
+                self.tasks.task_done()
+
+
+class ThreadPool:
+    """ Pool of threads consuming tasks from a queue """
+    def __init__(self, num_threads):
+        self.tasks = Queue(num_threads)
+        for _ in range(num_threads):
+            Worker(self.tasks)
+
+    def add_task(self, func, *args, **kargs):
+        """ Add a task to the queue """
+        self.tasks.put((func, args, kargs))
+
+    def map(self, func, args_list):
+        """ Add a list of tasks to the queue """
+        for args in args_list:
+            self.add_task(func, args)
+
+    def wait_completion(self):
+        """ Wait for completion of all the tasks in the queue """
+        self.tasks.join()
 
 
 def get_data(asin):
-    print(asin)
+    # print(asin)
     current_product = get_the_product(asin)
     if current_product:
         products.append(current_product)
-        print(current_product['asin'])
+        # print(current_product['asin'])
         json_data = json.dumps(current_product, indent=4, sort_keys=False)
         elastic_search.index(index="amazon", doc_type="product-title", id=asin, body=json_data)
 
@@ -179,7 +201,7 @@ def get_the_product(asin):
 
 
 def search_page_scrape(starting, ending, url):
-    print(starting, ending, url)
+    # print(starting, ending, url)
     driver = get_driver()
     driver.get(url)
 
@@ -187,80 +209,40 @@ def search_page_scrape(starting, ending, url):
         driver.quit()
         return
 
-    threads3 = []
     ind = starting
     while ind < ending:
+        print(ind, ending)
         try:
             result_id = "result_" + str(ind)
-            print(result_id)
+            # print(result_id, ind, ending)
             ele = driver.find_element_by_id(result_id)
             asin = ele.get_attribute('data-asin')
-
-            thread = ScrapingThread(asin, "", 2, "", "", "")
-            threads3.append(thread)
-
+            pool.add_task(get_data, (asin))
             ind += 1
         except Exception as e:
             ind += 1
-
-    ind = 0
-    while ind < len(threads3):
-        if threading.active_count() < THREADING_LIMIT:
-            try:
-                threads3[ind].start()
-                ind += 1
-            except Exception as e:
-                e = 1+2
-        else:
-            time.sleep(random.randint(1,4))
-
     return
 
 
 def give_a_search(search_text):
     print(search_text)
-    counter = 1
     url = SEARCH_URL + search_text
     pageNo = 1
-    threads2 = []
     while pageNo < 40:
-        thread = ScrapingThread("", "", 1, url+"&page="+str(pageNo), (pageNo-1)*30, pageNo*30)
-        threads2.append(thread)
+        pool.add_task(search_page_scrape, ((pageNo-1)*30, pageNo*30, url+"&page="+str(pageNo)))
         pageNo += 1
-
-    ind = 0;
-    while ind < len(threads2):
-        if threading.active_count() < THREADING_LIMIT:
-            try:
-                threads2[ind].start()
-                ind += 1
-            except Exception as e:
-                e = 1 + 2
-        else:
-            time.sleep(random.randint(1, 4))
+        print(pageNo, search_text)
 
 
 def solve():
-    threads = []
     for src in search_fields:
-        thread = ScrapingThread("", src, 0, "", "", "")
-        threads.append(thread)
-
-    ind = 0
-    while ind < len(threads):
-        if threading.active_count() < THREADING_LIMIT:
-            try:
-                threads[ind].start()
-                ind += 1
-            except Exception as e:
-                e = 1 + 2
-        else:
-            time.sleep(random.randint(1, 4))
-
+        pool.add_task(give_a_search, (src))
 
 
 if __name__ == "__main__":
     elastic_search = ElasticSearch.connect_elasticsearch()
     if elastic_search is not None:
+        pool = ThreadPool(THREADING_LIMIT)
         solve()
+        pool.wait_completion()
         print("len ", len(products))
