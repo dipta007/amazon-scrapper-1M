@@ -152,17 +152,17 @@ def get_the_product(asin):
         curr_product = {}
         curr_product['asin'] = asin
         curr_product['title'] = driver.find_element_by_id("productTitle").text
-        curr_product['price'] = get_price(driver)
-        curr_product['images'] = get_images(driver)
-
-        flg = True
-        for key, value in curr_product.items():
-            if value is None or not value or value == "None":
-                flg = False
-                break
-            elif type(value) == str and len(value) == 0:
-                flg = False
-                break
+        # curr_product['price'] = get_price(driver)
+        # curr_product['images'] = get_images(driver)
+        #
+        # flg = True
+        # for key, value in curr_product.items():
+        #     if value is None or not value or value == "None":
+        #         flg = False
+        #         break
+        #     elif type(value) == str and len(value) == 0:
+        #         flg = False
+        #         break
 
         driver.quit()
         if not flg:
