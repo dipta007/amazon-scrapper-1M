@@ -127,6 +127,7 @@ def get_price(driver):
 
 
 def get_the_product(asin):
+    print(asin)
     url = PRODUCT_URL + asin
     driver = get_driver()
     try:
@@ -157,6 +158,7 @@ def get_the_product(asin):
 
 
 def search_page_scrape(starting, ending, url):
+    print(starting, ending, url)
     driver = get_driver()
     driver.get(url)
 
@@ -181,6 +183,7 @@ def search_page_scrape(starting, ending, url):
 
 
 def give_a_search(search_text):
+    print(search_text)
     counter = 1
     url = SEARCH_URL + search_text
     pageNo = 1
