@@ -8,6 +8,7 @@ from selenium.webdriver.chrome.options import Options
 import Proxy
 import time
 import ElasticSearch
+import random
 
 
 SEARCH_URL = "https://www.amazon.com/s/ref=nb_sb_noss_2?url=search-alias%3Daps&field-keywords="
@@ -220,11 +221,8 @@ def solve():
             started_threads.put(curr_thread)
             curr_thread.start()
 
-        while not started_threads.empty():
-            started_threads.get().join()
-
-        if not_started_threads.empty():
-            time.sleep(10)
+        # if not_started_threads.empty():
+        #     time.sleep(random.randint(1, 4))
 
 
 if __name__ == "__main__":
