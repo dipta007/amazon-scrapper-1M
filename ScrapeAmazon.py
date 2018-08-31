@@ -182,6 +182,7 @@ def search_page_scrape(starting, ending, url):
         driver.quit()
         return
 
+    threads3 = []
     ind = starting
     while ind < ending:
         try:
@@ -190,13 +191,19 @@ def search_page_scrape(starting, ending, url):
             asin = ele.get_attribute('data-asin')
 
             thread = ScrapingThread(asin, "", 2, "", "", "")
-            thread.start()
-            threads.append(thread)
+            threads3.append(thread)
             not_started_threads.put(thread)
 
             ind += 1
         except Exception as e:
             ind += 1
+
+    for thread in threads3:
+        thread.start()
+
+    for thread in threads3:
+        thread.join()
+
     return
 
 
@@ -204,28 +211,30 @@ def give_a_search(search_text):
     counter = 1
     url = SEARCH_URL + search_text
     pageNo = 1
+    threads2 = []
     while pageNo < 40:
-        thread = ScrapingThread("", "", 1, url+"&page="+str(pageNo), counter, counter+40)
-        thread.start()
+        thread = ScrapingThread("", "", 1, url+"&page="+str(pageNo), (pageNo-1)*30, pageNo*30)
+        threads2.put(thread)
         pageNo += 1
-        not_started_threads.put(thread)
+
+    for thread in threads2:
+        thread.start()
+
+    for thread in threads2:
+        thread.join()
 
 
 def solve():
-    threads.clear()
+    threads = []
     for src in search_fields:
         thread = ScrapingThread("", src, 0, "", "", "")
+        threads.append(thread)
+
+    for thread in threads:
         thread.start()
-        not_started_threads.put(thread)
 
-    # while not not_started_threads.empty():
-    #     if threading.active_count() < THREADING_LIMIT:
-    #         curr_thread = not_started_threads.get()
-    #         started_threads.put(curr_thread)
-    #         curr_thread.start()
-
-        # if not_started_threads.empty():
-        #     time.sleep(random.randint(1, 4))
+    for thread in threads:
+        thread.join()
 
 
 if __name__ == "__main__":
