@@ -189,6 +189,7 @@ def give_a_search(search_text):
     pageNo = 1
     while pageNo < 40:
         full_url = url+"&page="+str(pageNo)
+        print(full_url)
         process = Process(target=search_page_scrape, args=(counter, counter+40, full_url))
         processes.append(process)
         counter += 30
