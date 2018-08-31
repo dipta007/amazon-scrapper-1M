@@ -61,8 +61,10 @@ def get_path_of_chrome_driver():
 def get_driver():
     options = Options()
     options.add_argument('--proxy-server=' + Proxy.get_proxy())
-    # driver = webdriver.Chrome(executable_path=get_path_of_chrome_driver(), chrome_options=options)
-    driver = webdriver.Chrome(get_path_of_chrome_driver())
+    options.add_argument('--nogui')
+    options.add_argument("'--no-sandbox'")
+    driver = webdriver.Chrome(executable_path=get_path_of_chrome_driver(), chrome_options=options)
+    # driver = webdriver.Chrome(get_path_of_chrome_driver())
     # driver.find_element_by_tag_name()
     return driver
 
