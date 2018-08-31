@@ -197,7 +197,7 @@ def solve():
         process = Process(target=give_a_search, args=(src,))
         processes.append(process)
 
-    for process, index in enumerate(processes):
+    for index, process in enumerate(processes):
         process.start()
 
         if index == len(processes) - 1:
