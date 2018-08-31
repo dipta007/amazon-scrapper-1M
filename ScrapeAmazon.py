@@ -192,7 +192,6 @@ def search_page_scrape(starting, ending, url):
 
             thread = ScrapingThread(asin, "", 2, "", "", "")
             threads3.append(thread)
-            not_started_threads.put(thread)
 
             ind += 1
         except Exception as e:
@@ -214,7 +213,7 @@ def give_a_search(search_text):
     threads2 = []
     while pageNo < 40:
         thread = ScrapingThread("", "", 1, url+"&page="+str(pageNo), (pageNo-1)*30, pageNo*30)
-        threads2.put(thread)
+        threads2.append(thread)
         pageNo += 1
 
     for thread in threads2:
