@@ -187,13 +187,20 @@ def give_a_search(search_text):
     counter = 1
     url = SEARCH_URL + search_text
     pageNo = 1
+
+    processes1 = []
     while pageNo < 40:
         full_url = url+"&page="+str(pageNo)
-        print(full_url)
         process = Process(target=search_page_scrape, args=(counter, counter+40, full_url))
-        processes.append(process)
+        processes1.append(process)
         counter += 30
         pageNo += 1
+
+    for process1 in processes1:
+        process1.start()
+
+    for process1 in processes1:
+        process1.join()
 
 
 def solve():
@@ -204,8 +211,8 @@ def solve():
     for index, process in enumerate(processes):
         process.start()
 
-        if index == len(processes) - 1:
-            time.sleep(random.randint(1,4))
+        # if index == len(processes) - 1:
+        #     time.sleep(random.randint(1,4))
 
     for process in processes:
         process.join()
