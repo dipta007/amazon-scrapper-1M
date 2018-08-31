@@ -190,8 +190,8 @@ def search_page_scrape(starting, ending, url):
             ele = driver.find_element_by_id(result_id)
             asin = ele.get_attribute('data-asin')
 
-            Process = Process(target=get_data, args=(asin,))
-            Process.start()
+            process = Process(target=get_data, args=(asin,))
+            process.start()
 
             ind += 1
         except Exception as e:
@@ -205,8 +205,8 @@ def give_a_search(search_text):
     pageNo = 1
     while pageNo < 40:
         full_url = url+"&page="+str(pageNo)
-        Process = Process(target=search_page_scrape, args=(counter, counter+40, full_url))
-        Process.start()
+        process = Process(target=search_page_scrape, args=(counter, counter+40, full_url))
+        process.start()
         counter += 30
         pageNo += 1
 
@@ -214,8 +214,8 @@ def give_a_search(search_text):
 def solve():
     threads.clear()
     for src in search_fields:
-        Process = Process(target=give_a_search, args=(src,))
-        Process.start()
+        process = Process(target=give_a_search, args=(src,))
+        process.start()
 
 
 if __name__ == "__main__":
