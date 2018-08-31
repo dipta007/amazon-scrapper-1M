@@ -16,7 +16,7 @@ search_fields = [
 ]
 products = []
 threads = []
-THREADING_LIMIT = 100
+THREADING_LIMIT = 30000
 started_threads = queue.Queue(maxsize=1000000)
 not_started_threads = queue.Queue(maxsize=1000000)
 elastic_search = None
