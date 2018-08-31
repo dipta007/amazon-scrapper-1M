@@ -60,9 +60,10 @@ def get_path_of_chrome_driver():
 
 def get_driver():
     options = Options()
-    options.add_argument('--proxy-server=' + Proxy.get_proxy())
-    options.add_argument('--nogui')
-    options.add_argument("'--no-sandbox'")
+    # options.add_argument('--proxy-server=' + Proxy.get_proxy())
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
     driver = webdriver.Chrome(executable_path=get_path_of_chrome_driver(), chrome_options=options)
     # driver = webdriver.Chrome(get_path_of_chrome_driver())
     # driver.find_element_by_tag_name()
