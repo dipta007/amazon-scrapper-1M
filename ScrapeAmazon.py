@@ -59,6 +59,7 @@ def get_data(asin):
     current_product = get_the_product(asin)
     if current_product:
         products.append(current_product)
+        print(current_product['asin'])
         json_data = json.dumps(current_product, indent=4, sort_keys=False)
         elastic_search.index(index="amazon", doc_type="product-title", id=asin, body=json_data)
 
@@ -151,8 +152,8 @@ def get_the_product(asin):
         curr_product = {}
         curr_product['asin'] = asin
         curr_product['title'] = driver.find_element_by_id("productTitle").text
-        # curr_product['price'] = get_price(driver)
-        # curr_product['images'] = get_images(driver)
+        curr_product['price'] = get_price(driver)
+        curr_product['images'] = get_images(driver)
 
         flg = True
         for key, value in curr_product.items():
@@ -171,7 +172,6 @@ def get_the_product(asin):
     except Exception as e:
         print("Not found product " + asin)
         print(e)
-        driver.quit()
 
 
 def search_page_scrape(starting, ending, url):
