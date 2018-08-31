@@ -200,6 +200,7 @@ def get_the_product(asin):
     except Exception as e:
         print("Not found product " + asin)
         print(e)
+        driver.quit()
 
 
 def search_page_scrape(starting, ending, url):
@@ -223,6 +224,8 @@ def search_page_scrape(starting, ending, url):
             ind += 1
         except Exception as e:
             ind += 1
+
+    driver.quit()
     return
 
 
