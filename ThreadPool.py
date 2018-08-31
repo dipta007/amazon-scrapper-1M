@@ -79,11 +79,11 @@ class ThreadPool:
 
 
 def get_data(asin):
-    # print(asin)
+    print(asin)
     current_product = get_the_product(asin)
     if current_product:
         products.append(current_product)
-        # print(current_product['asin'])
+        print(current_product['asin'], "Sdasd")
         json_data = json.dumps(current_product, indent=4, sort_keys=False)
         elastic_search.index(index="amazon", doc_type="product-title", id=asin, body=json_data)
 
@@ -109,6 +109,7 @@ def get_driver():
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
+    chrome_options.add_argument("disable-gpu")
 
     # options.add_argument('--no-zygote')
     # options.add_argument("window-size=1024,768")
