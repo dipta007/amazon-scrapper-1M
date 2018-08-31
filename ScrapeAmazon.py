@@ -68,7 +68,7 @@ def get_path_of_chrome_driver():
     path = os.path.join( os.getcwd() + "/webdriver", "chromedriver")
     if _platform == "linux" or _platform == "linux2":
         # linux
-        path += "_linux64"
+        path += "_linux"
     elif _platform == "darwin":
         # MAC OS X
         path += "_mac"
