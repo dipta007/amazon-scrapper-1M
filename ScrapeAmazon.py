@@ -165,8 +165,8 @@ def get_the_product(asin):
         #         break
 
         driver.quit()
-        if not flg:
-            return
+        # if not flg:
+        #     return
 
         return curr_product
     except Exception as e:
