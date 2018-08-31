@@ -207,10 +207,11 @@ def give_a_search(search_text):
         if counter == tmp:
             break
 
+    try:
         next_button = driver.find_element_by_id("pagnNextLink")
         driver.execute_script("arguments[0].click();", next_button)
-        print(next_button.text)
-    driver.quit()
+    except Exception as e:
+        driver.quit()
 
 
 def solve():
