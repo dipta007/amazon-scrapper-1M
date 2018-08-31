@@ -203,6 +203,9 @@ def solve():
         if index == len(processes) - 1:
             time.sleep(random.randint(1,4))
 
+    for process in processes:
+        process.join()
+
 
 if __name__ == "__main__":
     elastic_search = ElasticSearch.connect_elasticsearch()
