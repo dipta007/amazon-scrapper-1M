@@ -190,6 +190,7 @@ def search_page_scrape(starting, ending, url):
             asin = ele.get_attribute('data-asin')
 
             thread = ScrapingThread(asin, "", 2, "", "", "")
+            thread.start()
             threads.append(thread)
             not_started_threads.put(thread)
 
@@ -205,6 +206,7 @@ def give_a_search(search_text):
     pageNo = 1
     while pageNo < 40:
         thread = ScrapingThread("", "", 1, url+"&page="+str(pageNo), counter, counter+40)
+        thread.start()
         pageNo += 1
         not_started_threads.put(thread)
 
@@ -213,13 +215,14 @@ def solve():
     threads.clear()
     for src in search_fields:
         thread = ScrapingThread("", src, 0, "", "", "")
+        thread.start()
         not_started_threads.put(thread)
 
-    while not not_started_threads.empty():
-        if threading.active_count() < THREADING_LIMIT:
-            curr_thread = not_started_threads.get()
-            started_threads.put(curr_thread)
-            curr_thread.start()
+    # while not not_started_threads.empty():
+    #     if threading.active_count() < THREADING_LIMIT:
+    #         curr_thread = not_started_threads.get()
+    #         started_threads.put(curr_thread)
+    #         curr_thread.start()
 
         # if not_started_threads.empty():
         #     time.sleep(random.randint(1, 4))
