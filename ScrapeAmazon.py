@@ -12,11 +12,23 @@ import ElasticSearch
 SEARCH_URL = "https://www.amazon.com/s/ref=nb_sb_noss_2?url=search-alias%3Daps&field-keywords="
 PRODUCT_URL = "https://www.amazon.com/dp/"
 search_fields = [
-    "iphone"
+    "iphone",
+    "mobile",
+    "beauty",
+    "hair",
+    "apple",
+    "macbook",
+    "calcukator",
+    "pen",
+    "glass",
+    "note 8",
+    "samsung",
+    "wallet",
+    "watch"
 ]
 products = []
 threads = []
-THREADING_LIMIT = 30000
+THREADING_LIMIT = 3
 started_threads = queue.Queue(maxsize=1000000)
 not_started_threads = queue.Queue(maxsize=1000000)
 elastic_search = None
@@ -198,6 +210,11 @@ def solve():
     for src in search_fields:
         give_a_search(src)
 
+    while not not_started_threads.empty():
+        if threading.active_count() < THREADING_LIMIT:
+            curr_thread = not_started_threads.get()
+            started_threads.put(curr_thread)
+            curr_thread.start()
     while not started_threads.empty():
         started_threads.get().join()
 
