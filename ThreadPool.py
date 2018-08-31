@@ -32,7 +32,7 @@ search_fields = [
 ]
 products = []
 threads = []
-THREADING_LIMIT = 444
+THREADING_LIMIT = 100
 elastic_search = None
 
 
@@ -92,7 +92,7 @@ def get_path_of_chrome_driver():
     path = os.path.join(os.getcwd() + "/webdriver", "chromedriver")
     if _platform == "linux" or _platform == "linux2":
         # linux
-        path += "_linux"
+        path += ""
     elif _platform == "darwin":
         # MAC OS X
         path += "_mac"
@@ -109,7 +109,8 @@ def get_driver():
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
-    chrome_options.add_argument("disable-gpu")
+    options.add_argument("disable-gpu")
+    options.add_argument('--disable-extensions')
 
     # options.add_argument('--no-zygote')
     # options.add_argument("window-size=1024,768")
