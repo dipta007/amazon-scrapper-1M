@@ -193,7 +193,6 @@ def give_a_search(search_text):
 
 
 def solve():
-    threads.clear()
     for src in search_fields:
         process = Process(target=give_a_search, args=(src,))
         process.start()
