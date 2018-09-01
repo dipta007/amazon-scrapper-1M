@@ -32,7 +32,7 @@ search_fields = [
 ]
 products = []
 threads = []
-THREADING_LIMIT = 100
+THREADING_LIMIT = 222
 elastic_search = None
 
 
@@ -102,7 +102,27 @@ def get_path_of_chrome_driver():
     return path
 
 
+def get_path_of_firefox_driver():
+    path = os.path.join(os.getcwd() + "/webdriver", "geckodriver")
+    if _platform == "linux" or _platform == "linux2":
+        # linux
+        path += "_linux"
+    elif _platform == "darwin":
+        # MAC OS X
+        path += "_mac"
+    elif _platform == "win32" or _platform == "win64":
+        # Windows
+        path += "_win"
+    return path
+
+
 def get_driver():
+    options = webdriver.FirefoxOptions()
+    options.add_argument('-headless')
+
+    browser = webdriver.Firefox(executable_path=get_path_of_firefox_driver(), firefox_options=options)
+    return browser
+
     driver = webdriver.PhantomJS()
     driver.set_window_size(1120, 550)
     return driver
