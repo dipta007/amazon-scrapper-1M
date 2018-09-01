@@ -103,6 +103,10 @@ def get_path_of_chrome_driver():
 
 
 def get_driver():
+    driver = webdriver.PhantomJS()
+    driver.set_window_size(1120, 550)
+    return driver
+
     options = Options()
     # options.add_argument('--proxy-server=' + Proxy.get_proxy())
 
